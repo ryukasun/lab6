@@ -56,6 +56,7 @@ import pokerBase.Hand;
 import pokerBase.Player;
 import pokerBase.Table;
 import pokerEnums.eAction;
+import pokerEnums.eDrawCount;
 import pokerEnums.eGame;
 import pokerEnums.ePlayerPosition;
 
@@ -66,13 +67,18 @@ public class PokerTableController {
 
 	public PokerTableController() {
 	}
-	
-	@FXML private ImageView imgViewDealerButtonPos1;
-	@FXML private ImageView imgViewDealerButtonPos2;
-	@FXML private ImageView imgViewDealerButtonPos3;
-	@FXML private ImageView imgViewDealerButtonPos4;
-	
-	@FXML private BorderPane OuterBorderPane;
+
+	@FXML
+	private ImageView imgViewDealerButtonPos1;
+	@FXML
+	private ImageView imgViewDealerButtonPos2;
+	@FXML
+	private ImageView imgViewDealerButtonPos3;
+	@FXML
+	private ImageView imgViewDealerButtonPos4;
+
+	@FXML
+	private BorderPane OuterBorderPane;
 
 	@FXML
 	private Label lblNumberOfPlayers;
@@ -98,6 +104,15 @@ public class PokerTableController {
 	private Label lblPos3Name;
 	@FXML
 	private Label lblPos4Name;
+
+	@FXML
+	private HBox hBoxDeck;
+	
+	@FXML private HBox hboxP1Cards;
+	@FXML private HBox hboxP2Cards;
+	@FXML private HBox hboxP3Cards;
+	@FXML private HBox hboxP4Cards;
+	
 
 	@FXML
 	private void initialize() {
@@ -166,8 +181,8 @@ public class PokerTableController {
 		lblPos3Name.setText("");
 		lblPos4Name.setText("");
 
-		//scanInputControls(OuterBorderPane, "SitLeave",true);
-		
+		// scanInputControls(OuterBorderPane, "SitLeave",true);
+
 		btnPos1SitLeave.setVisible(true);
 		btnPos2SitLeave.setVisible(true);
 		btnPos3SitLeave.setVisible(true);
@@ -234,25 +249,61 @@ public class PokerTableController {
 		}
 	}
 
-	public void Handle_GameState(GamePlay HubGamePlay) 
-	{
-		/*
-		imgViewDealerButtonPos1.setVisible(false);
-		imgViewDealerButtonPos2.setVisible(false);
-		imgViewDealerButtonPos3.setVisible(false);
-		imgViewDealerButtonPos4.setVisible(false);
-		*/
+	public void Handle_GameState(GamePlay HubGamePlay) {
+		// Set the Dealer Face Down card
+		hBoxDeck.getChildren().clear();
 
-		//TODO - Lab #5: Check to see if you're the dealer..  If you are, make the imgViewDealerButtonX visible = true
+		ImageView imgBottomCard = new ImageView(
+				new Image(getClass().getResourceAsStream("/img/b1fh.png"), 75, 75, true, true));
+		hBoxDeck.getChildren().add(imgBottomCard);
+
+		//int iDraw = HubGamePlay.getDrawCnt().getDrawNo();
 		
+		for (int i: HubGamePlay.GetOrder(HubGamePlay.getGameDealer().getiPlayerPosition()))
+		{
+			if (HubGamePlay.getPlayerByPosition(i) != null)
+			{
+				Player p = HubGamePlay.getPlayerByPosition(i);
+				Hand h = HubGamePlay.getPlayerHand(p.getPlayerID());
+				
+				for (Card c: h.getCardsInHand())
+				{
+					ImageView imgCard = new ImageView(
+							new Image(getClass().getResourceAsStream("/img/" + c.getiCardNbr() + ".png"), 50, 50, true, true));
+					switch (i)
+					{
+					case 1:
+						hboxP1Cards.getChildren().add(imgCard);
+						break;
+					case 2:
+						hboxP2Cards.getChildren().add(imgCard);
+						break;
+					case 3:
+						hboxP3Cards.getChildren().add(imgCard);
+						break;
+					case 4:
+						hboxP4Cards.getChildren().add(imgCard);
+						break;
+					}
+				}
+			}
+		}
+
 	}
+
 	@FXML
 	void btnStart_Click(ActionEvent event) {
-		Action act = new Action(eAction.StartGame, mainApp.getPlayer());		
+		Action act = new Action(eAction.StartGame, mainApp.getPlayer());
 		int iRuleNbr = Integer.parseInt(mainApp.getRuleName().replace("PokerGame", ""));
 		eGame Game = eGame.getGame(iRuleNbr);
 		act.seteGame(Game);
 		
+		//	Clear the Cards in each players hands
+		hboxP1Cards.getChildren().clear();
+		hboxP2Cards.getChildren().clear();
+		hboxP3Cards.getChildren().clear();
+		hboxP4Cards.getChildren().clear();
+
 		mainApp.messageSend(act);
 	}
 
@@ -277,24 +328,21 @@ public class PokerTableController {
 	}
 
 	private void scanInputControls(Pane parent, String strControlStartsWith, boolean bVisible) {
-	    for (Node component : parent.getChildren()) {
-	        if (component instanceof Pane) {
-	            //if the component is a container, scan its children
-	            scanInputControls((Pane) component, strControlStartsWith, bVisible);
-	        } else if (component instanceof TextField) {
-	        }
-	        else if (component instanceof Button)
-	        {
-	        	Button b = (Button)component;	        	
-	        	if ((b.getId() != null) && (b.getId().endsWith(strControlStartsWith)))
-	        	{
-	        		System.out.println(b.getId());
-	        		b.setVisible(bVisible);
-	        	}
-	        }
-	    }
+		for (Node component : parent.getChildren()) {
+			if (component instanceof Pane) {
+				// if the component is a container, scan its children
+				scanInputControls((Pane) component, strControlStartsWith, bVisible);
+			} else if (component instanceof TextField) {
+			} else if (component instanceof Button) {
+				Button b = (Button) component;
+				if ((b.getId() != null) && (b.getId().endsWith(strControlStartsWith))) {
+					System.out.println(b.getId());
+					b.setVisible(bVisible);
+				}
+			}
+		}
 	}
-	
+
 	private void FadeButton(Button btn) {
 		FadeTransition ft = new FadeTransition(Duration.millis(3000), btn);
 		ft.setFromValue(1.0);

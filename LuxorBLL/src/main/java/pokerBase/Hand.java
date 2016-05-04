@@ -19,10 +19,13 @@ import exceptions.HandException;
 import pokerEnums.*;
 
 import static java.lang.System.out;
+
+import java.io.Serializable;
+
 import static java.lang.System.err;
 
 @XmlRootElement
-public class Hand  {
+public class Hand  implements Serializable {
 
 	@XmlElement(name = "Card")
 	private ArrayList<Card> CardsInHand;
@@ -32,6 +35,7 @@ public class Hand  {
 
 	private HandScore HandScore;
 	private boolean bScored = false;
+	private boolean isFolded = false;
 
 	public Hand() {
 		setHandScore(new HandScore());
@@ -100,6 +104,15 @@ public class Hand  {
 	}
 
 	
+	
+	public boolean isFolded() {
+		return isFolded;
+	}
+
+	public void setFolded(boolean isFolded) {
+		this.isFolded = isFolded;
+	}
+
 	public static Hand Evaluate(ArrayList<Hand> Hands) throws HandException
 	{
 		ArrayList<Hand> AllHands = new ArrayList<Hand>();

@@ -8,21 +8,25 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.UUID;
 
+import pokerEnums.eDrawCount;
+
 public class GamePlay implements Serializable   {
 
 	private UUID GameID;
-	//private UUID PlayerID_NextToAct = null;
-	private HashMap<UUID, Player> hmGamePlayers = new HashMap<UUID, Player>();
-	private ArrayList<GamePlayPlayerHand> GamePlayerHand = new ArrayList<GamePlayPlayerHand>();
-	private ArrayList<GamePlayPlayerHand> GameCommonHand = new ArrayList<GamePlayPlayerHand>();
-	private Rule rle;
+	private Rule rle;	
 	private Deck GameDeck = null;
-	private UUID GameDealer = null;
+
+	private HashMap<UUID, Player> hmGamePlayers = new HashMap<UUID, Player>();
+	private HashMap<UUID, Hand> hmGamePlayerHand = new HashMap<UUID, Hand>();
+	private Hand CommonHand = new Hand();
+	private Player GameDealer = null;
+	private Player PlayerNextToAct = null;	
 	private int[] iActOrder = null;
-	private Player PlayerNextToAct = null;
+
+	private eDrawCount DrawCnt;
 	
 	
-	public GamePlay(Rule rle, UUID GameDealerID)
+	public GamePlay(Rule rle, Player GameDealer)
 	{
 		this.setGameID(UUID.randomUUID());
 		this.setGameDealer(GameDealer);
@@ -48,12 +52,16 @@ public class GamePlay implements Serializable   {
 
 	public void setGamePlayers(HashMap<UUID, Player> gamePlayers) {
 		this.hmGamePlayers = new HashMap<UUID, Player>(gamePlayers);
+		
+		Iterator it = getGamePlayers().entrySet().iterator();
+		while (it.hasNext()) {
+			Map.Entry pair = (Map.Entry) it.next();
+			Player p = (Player)pair.getValue();
+			this.addPlayerHand(p.getPlayerID());
+		}
+		
 	}
 	
-	public void addPlayerToGame(Player p)
-	{
-		this.hmGamePlayers.put(p.getPlayerID(),p);
-	}
 	public Player getGamePlayer(UUID PlayerID)
 	{
 		return (Player) this.hmGamePlayers.get(PlayerID);
@@ -67,23 +75,15 @@ public class GamePlay implements Serializable   {
 		GameDeck = gameDeck;
 	}
 	
-	public UUID getGameDealer() {
+	public Player getGameDealer() {
 		return GameDealer;
 	}
 
-	private void setGameDealer(UUID gameDealer) {
+	private void setGameDealer(Player gameDealer) {
 		GameDealer = gameDealer;
 	}
 
-	public void addGamePlayPlayerHand(GamePlayPlayerHand GPPH)
-	{
-		GamePlayerHand.add(GPPH);
-	}
-	
-	public void addGamePlayCommonHand(GamePlayPlayerHand GPCH)
-	{
-		GameCommonHand.add(GPCH);
-	}
+
 
 	public int[] getiActOrder() {
 		return iActOrder;
@@ -93,7 +93,54 @@ public class GamePlay implements Serializable   {
 		this.iActOrder = iActOrder;
 	}
 
-	
+	public eDrawCount getDrawCnt() {
+		return DrawCnt;
+	}
+
+	public void setDrawCnt(eDrawCount nextDraw) {
+		DrawCnt = nextDraw;
+	}
+
+	public Player ComputePlayerNextToAct(int iCurrentPosition)
+	{
+		int [] iNextOrder = GetOrder(iCurrentPosition);
+		
+		for (int i : iNextOrder)
+		{
+			if (getPlayerByPosition(i) != null)
+			{
+				if (i == iCurrentPosition)
+					return null;
+				else
+					return getPlayerByPosition(i);	
+			}				
+		}
+		
+		return null;
+				
+		/*
+		int iNextPosition = -1;
+		try {
+			for (int i : iOrder) {
+				if (iCurrentPosition == i) {
+					iNextPosition = iOrder[i + 1];
+				}
+			}
+		} catch (ArrayIndexOutOfBoundsException e) {
+			// Whoops! Asking for something beyond the size of the array
+			iNextPosition = iOrder[0];
+		}
+		
+		if (getPlayerByPosition(iNextPosition) == null)
+		{
+			return ComputePlayerNextToAct(iNextPosition, iOrder);
+		}
+		else
+		{
+			return  getPlayerByPosition(iNextPosition);
+		}
+		*/					
+	}
 	public Player getPlayerNextToAct() {
 		return PlayerNextToAct;
 	}
@@ -101,6 +148,7 @@ public class GamePlay implements Serializable   {
 	public void setPlayerNextToAct(Player playerNextToAct) {
 		PlayerNextToAct = playerNextToAct;
 	}
+	
 
 	public static int[] GetOrder(int iStartPosition) {
 		int[] iPos = null;
@@ -124,6 +172,13 @@ public class GamePlay implements Serializable   {
 		}
 		return iPos;
 	}
+	
+	
+	
+	
+	
+	
+	
 
 	public static int NextPosition(int iCurrentPosition, int[] iOrder) {
 		int iNextPosition = -1;
@@ -155,35 +210,22 @@ public class GamePlay implements Serializable   {
 		
 		return pl;
 	}
-	/*
-	public GamePlayPlayerHand FindCommonHand(GamePlay gme)
+	
+	private void addPlayerHand(UUID PlayerID)
 	{
-		GamePlayPlayerHand GPCH = null;
-		for (GamePlayPlayerHand GPPH: GameCommonHand)
-		{
-			if (GPPH.getGame().getGameID() == gme.getGameID())
-			{
-				GPCH = GPPH;
-			}
-		}		
-		return GPCH;
+		hmGamePlayerHand.put(PlayerID,  new Hand());
 	}
-	*/
 	
-/*	public GamePlayPlayerHand FindPlayerGame(GamePlay gme, Player p)
+	public Hand getPlayerHand(UUID PlayerID)
 	{
-		GamePlayPlayerHand GPPHReturn = null;
-		
+		return (Hand)hmGamePlayerHand.get(PlayerID);
+	}
 	
-		for (GamePlayPlayerHand GPPH: GamePlayerHand)
-		{
-			if (p.getiPlayerPosition() == GPPH.getPlayer().getiPlayerPosition())
-			{
-				GPPHReturn = GPPH;
-			}
-		}
-		return GPPHReturn;
-	}*/
+	public Hand getCommonHand()
+	{
+		return CommonHand;
+	}
 	
+
 	
 }

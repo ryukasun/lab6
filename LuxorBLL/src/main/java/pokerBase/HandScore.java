@@ -1,10 +1,11 @@
 package pokerBase;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 import javax.xml.bind.annotation.XmlElement;
 
-public class HandScore {
+public class HandScore  implements Serializable {
 
 
 	private int HandStrength;

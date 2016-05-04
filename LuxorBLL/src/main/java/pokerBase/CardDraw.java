@@ -4,29 +4,39 @@ import java.io.Serializable;
 
 import pokerEnums.eCardCount;
 import pokerEnums.eCardDestination;
+import pokerEnums.eCardNo;
 import pokerEnums.eCardVisibility;
-
 
 public class CardDraw implements Serializable {
 
-	private eCardCount CardCount;
+	private eCardCount CardPosition;
 	private eCardDestination CardDestination;
 	private eCardVisibility CardVisibility;
-	public CardDraw(eCardCount cardCount, eCardDestination cardDestination, eCardVisibility cardVisiblity) {
+	private eCardCount CardCountDrawn;
+
+	public CardDraw(eCardCount eCardPosition, eCardCount eCardCountDrawn, eCardDestination cardDestination,	eCardVisibility cardVisiblity) {
 		super();
-		CardCount = cardCount;
-		CardDestination = cardDestination;
-		CardVisibility = CardVisibility;
+		this.CardCountDrawn = eCardCountDrawn;
+		this.CardDestination = cardDestination;
+		this.CardVisibility = CardVisibility;
+		this.CardPosition = eCardPosition;
 	}
-	public eCardCount getCardCount() {
-		return CardCount;
-	}
+
 	public eCardDestination getCardDestination() {
 		return CardDestination;
 	}
+
 	public eCardVisibility getCardVisibility() {
 		return CardVisibility;
 	}
-	
-	
+
+	public eCardCount getCardPosition() {
+		return CardPosition;
+	}
+
+	public eCardCount getCardCountDrawn() {
+		return CardCountDrawn;
+	}
+
+
 }
